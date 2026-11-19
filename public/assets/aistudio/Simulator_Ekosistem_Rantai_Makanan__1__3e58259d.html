@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulator Ekosistem Rantai Makanan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Instrument+Sans:wght@400;500;600&family=Inter+Tight:wght@500;600&display=swap">
+<style>
+:root{--bg:#eaf3f1;--card:#fbfefd;--ink:#0b2a2e;--mute:#53706f;--line:#cfe0dc;--grid:#e1ece9;--soft:#dcebe7;--or:#d76d0b;--rd:#cf3434;--ok:#1f9254;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#061417;--card:#0d2125;--ink:#e3f1ee;--mute:#8fb0ad;--line:#1d3b40;--grid:#173035;--soft:#12302f;--or:#f59a43;--rd:#ff7070;--ok:#4fd08a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#061417;--card:#0d2125;--ink:#e3f1ee;--mute:#8fb0ad;--line:#1d3b40;--grid:#173035;--soft:#12302f;--or:#f59a43;--rd:#ff7070;--ok:#4fd08a;color-scheme:dark}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1400px;margin:0 auto;padding:26px 18px 40px}
+h1{font:600 clamp(28px,4.2vw,44px)/1.08 "Newsreader",Georgia,serif;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--mute);max-width:70ch;margin:0 0 18px}
+h2,h3{font:600 17px/1.3 "Newsreader",Georgia,serif;margin:0 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+button,select{font:500 13.5px "Instrument Sans",system-ui,sans-serif;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:10px;padding:7px 12px;cursor:pointer}
+select{background:var(--card)}
+button:hover{background:var(--soft)}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid #2a62d1;outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center}
+.top label{font-size:13px;color:var(--mute);display:flex;gap:8px;align-items:center}
+.seg{display:flex;gap:4px}
+.layout{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.g2 .card{margin-bottom:0}
+.g2{margin-bottom:12px}
+canvas{width:100%;display:block}
+#ar{height:340px;border-radius:10px;background:#11606b}
+#tsc,#ph{height:300px}#fw{height:270px}
+#tsc{cursor:ew-resize;touch-action:pan-y}
+.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.ctrl input[type=range]{flex:1;min-width:130px;margin:0}
+.ctrl span{font-size:13px;color:var(--mute);min-width:90px;text-align:right}
+.ctl{margin:8px 0}
+.ctl label{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.ctl output{font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:#2a62d1;margin:4px 0 0}
+input[type=text]{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--card);color:var(--ink);font:inherit;min-width:0}
+input[type=color]{width:38px;height:34px;border:1px solid var(--line);border-radius:8px;padding:2px;background:var(--card)}
+.row{display:flex;gap:6px;align-items:center;margin:6px 0}
+.row input[type=text]{flex:1}
+.em{max-width:54px;text-align:center;font-size:18px}
+details.sp{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card)}
+details.sp summary{padding:9px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600}
+details.sp summary i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.bd{padding:0 12px 12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{display:flex;gap:6px;align-items:center;padding:4px 10px}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.chip.off{opacity:.4}
+.hint{font-size:12.5px;color:var(--mute);margin:6px 0 0}
+.srow{display:grid;grid-template-columns:minmax(0,1.3fr) 54px minmax(50px,1fr) 80px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);cursor:pointer;font-size:13.5px}
+.srow b{text-align:right;font-variant-numeric:tabular-nums}
+.srow.off{opacity:.4}
+.srow em{font-style:normal;font-size:12.5px}
+.pb{height:8px;background:var(--soft);border-radius:4px;overflow:hidden;display:block}
+.pb i{display:block;height:100%}
+.sum{margin:0 0 6px;font-weight:600}
+.evb{display:flex;flex-wrap:wrap;gap:6px}
+.evb .grp,.grp{width:100%;margin:8px 0 2px;font-size:13px;font-weight:600;color:var(--mute)}
+.evb button.on{background:var(--ink);color:var(--bg)}
+.tk div,.evi{background:var(--soft);border-radius:8px;padding:6px 10px;margin-top:6px;font-size:13.5px}
+.cmpx{border-left:3px solid var(--or)}
+@media (max-width:1000px){.g2{grid-template-columns:minmax(0,1fr)}.g2 .card{margin-bottom:12px}}
+@media (max-width:860px){.layout{grid-template-columns:minmax(0,1fr)}#ar{height:300px}}
+</style>
+<style id="v2">
+:root{--bg:#EDEBE6;--card:#F4F2ED;--ink:#141414;--mute:#6D6A63;--line:rgba(20,20,20,.2);--grid:#dcd9d2;--soft:#E6E3DC;--cb:#1F3FB0;--or:#C8470F;--rd:#C0302A;--ok:#17724A;--ease:cubic-bezier(.2,.8,.2,1);--sans2:"Inter Tight","Instrument Sans",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E100F;--card:#161917;--ink:#ECE9E2;--mute:#9C998F;--line:rgba(236,233,226,.22);--grid:#262a27;--soft:#1E221F;--cb:#8aa0ff;--or:#f59a43;--rd:#ff7a70;--ok:#4fd08a}.grain{opacity:.3!important}}
+:root[data-theme="dark"]{--bg:#0E100F;--card:#161917;--ink:#ECE9E2;--mute:#9C998F;--line:rgba(236,233,226,.22);--grid:#262a27;--soft:#1E221F;--cb:#8aa0ff;--or:#f59a43;--rd:#ff7a70;--ok:#4fd08a}
+html{scroll-behavior:smooth}
+@media (pointer:fine){html,body,button,a,summary,select,canvas,input,label{cursor:none!important}}
+.wrap>h1,.wrap>.sub{display:none}
+.grain{position:fixed;inset:0;z-index:70;pointer-events:none;mix-blend-mode:multiply;opacity:.55;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .42  0 0 0 0 .38  0 0 0 .22 0'/></filter><rect width='220' height='220' filter='url(%23n)'/></svg>")}
+.lbl{font:600 10.5px/1 var(--sans2);letter-spacing:.09em;text-transform:uppercase}
+.bx{display:inline-flex;align-items:center;height:23px;padding:0 9px;border:1px solid var(--ink)}
+.tb{position:fixed;left:0;right:0;top:0;height:64px;padding:0 28px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;z-index:50;background:linear-gradient(var(--bg),rgba(237,235,230,0))}
+.tb>:first-child{justify-self:start}.tb>:last-child{justify-self:end}
+.lg{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--cb)}
+.lg b{font:600 19px/1 var(--serif);letter-spacing:.22em;padding-left:.22em}.lg i{font:600 8.5px/1 var(--sans2);letter-spacing:.34em;padding-left:.34em;font-style:normal}
+.hero{position:relative;min-height:92svh;display:flex;flex-direction:column;padding-top:96px;overflow:hidden;border-bottom:1px solid var(--ink)}
+.dia{position:absolute;right:-10vw;top:46%;width:min(64vw,760px);height:min(64vw,760px);transform:translateY(-50%);color:var(--cb);animation:spin 180s linear infinite}
+@keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+.hin{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:24px;padding:0 6vw 40px}
+.hh{margin:0;font:400 clamp(52px,9.6vw,150px)/.92 var(--serif);letter-spacing:-.035em}
+.hh em{font-style:italic;color:var(--cb)}
+.hm{overflow:hidden;display:block}.hm>span{display:block}
+.hp{margin:0;font:400 clamp(17px,1.6vw,22px)/1.45 var(--serif);max-width:46ch}
+.hrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.cta{display:inline-flex;align-items:center;height:46px;padding:0 24px;background:var(--cb);color:#fff;border:1px solid var(--cb);font:600 11px/1 var(--sans2);letter-spacing:.09em;text-transform:uppercase;text-decoration:none;transition:background .3s var(--ease),color .3s var(--ease)}
+.cta:hover{background:transparent;color:var(--cb)}
+.mq{overflow:hidden;border-top:1px solid var(--ink);position:relative;z-index:2;background:var(--bg)}
+.mqt{display:flex;width:max-content;white-space:nowrap;animation:mq 40s linear infinite;font:italic 400 28px/1 var(--serif);padding:14px 0}
+.mqt span{padding-right:.6em}
+@keyframes mq{to{transform:translateX(-50%)}}
+.apphd{margin:34px 0 22px;display:flex;flex-direction:column;gap:12px}
+.apphd h2{font:400 clamp(36px,5vw,72px)/1.02 var(--serif);letter-spacing:-.03em;margin:0}
+.apphd .hm>span{transform:translateY(105%);transition:transform .9s var(--ease)}.apphd.in .hm>span{transform:none}
+.apphd p{margin:0;max-width:64ch;color:var(--mute)}
+.rv{transform:translateY(80px) rotate(1.4deg);transform-origin:0 100%}.rv.in{transform:none;transition:transform 1.1s var(--ease)}
+.card{background:var(--card);border:1px solid var(--ink);border-radius:0}
+.layout{counter-reset:sec}
+.card>h3::before,.card>h2::before{counter-increment:sec;content:counter(sec,decimal-leading-zero);font:600 10px/1 var(--sans2);letter-spacing:.08em;border:1px solid var(--ink);padding:3px 6px;margin-right:10px;vertical-align:3px}
+.card h2,.card h3{font:400 22px/1.2 var(--serif);letter-spacing:-.01em}
+button,select{border-radius:0;border:1px solid var(--ink);color:var(--ink);background:transparent;font:600 10.5px/1 var(--sans2);letter-spacing:.09em;text-transform:uppercase;padding:0 12px;height:30px;transition:background .3s var(--ease),color .3s var(--ease)}
+select{background:var(--card)}
+button:hover{background:var(--ink);color:var(--bg)}
+button.on{background:var(--cb);color:#fff;border-color:var(--cb)}
+.chip,.evb button{text-transform:none;letter-spacing:0;font:500 13px "Instrument Sans",system-ui,sans-serif;height:auto;padding:7px 12px}
+.evb button.on{background:var(--cb);color:#fff}
+.top label{font:600 10.5px/1 var(--sans2);letter-spacing:.09em;text-transform:uppercase;color:var(--mute);gap:10px}
+.tabs2{position:relative;display:inline-flex;isolation:isolate}
+.tabs2 button{margin-left:-1px;height:26px}.tabs2 button:first-child{margin-left:0}
+.tabs2 .ind{position:absolute;left:0;top:0;height:100%;width:0;background:var(--cb);transition:width .6s var(--ease),transform .6s var(--ease);z-index:-1}
+.tabs2 button.on{background:transparent;color:#fff;border-color:var(--ink)}
+.tabs2 button:hover{background:transparent;color:var(--cb)}.tabs2 button.on:hover{color:#fff}
+input[type=range]{-webkit-appearance:none;appearance:none;height:18px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--ink)}
+input[type=range]::-moz-range-track{height:1px;background:var(--ink)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;background:var(--cb);border:0;border-radius:0;margin-top:-5.5px}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;background:var(--cb);border:0;border-radius:0}
+input[type=text],input[type=color]{border-radius:0;border-color:var(--ink)}
+details.sp{border-radius:0;border-color:var(--line)}
+.evi,.tk div{border-radius:0}.cmpx{border-left:3px solid var(--cb)}
+#ar{border-radius:0;border:1px solid var(--ink)}
+#cur{position:fixed;left:0;top:0;width:58px;height:58px;margin:-29px 0 0 -29px;z-index:100;pointer-events:none;display:none}
+@media (pointer:fine){#cur{display:block}}
+#cur .r{position:absolute;inset:0;border:1.5px solid var(--ink);border-radius:50%;transition:transform .5s var(--ease),background .4s var(--ease),border-color .4s var(--ease)}
+#cur .d{position:absolute;left:26px;top:26px;width:6px;height:6px;border-radius:50%;background:var(--ink);transition:transform .4s var(--ease)}
+#cur .l{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font:600 9.5px/1.25 var(--sans2);letter-spacing:.1em;color:#fff;transform:scale(0);transition:transform .45s var(--ease)}
+#cur.btn .r{transform:scale(.55)}#cur.btn .d{transform:scale(0)}
+#cur.open .r{transform:scale(1.75);background:var(--cb);border-color:var(--cb)}#cur.open .d{transform:scale(0)}#cur.open .l{transform:scale(1)}
+@media (max-width:860px){.tb{padding:0 14px}.dia{right:-30vw;width:110vw;height:110vw}}
+@media (prefers-reduced-motion:reduce){.dia,.mqt{animation:none}.rv{transform:none}.apphd .hm>span{transform:none}html{scroll-behavior:auto}}
+#pg{position:fixed;left:0;top:0;height:3px;width:100%;background:var(--cb);transform:scaleX(0);transform-origin:0 50%;z-index:90}
+.bb{position:absolute;bottom:-60px;z-index:1;pointer-events:none;animation:rise linear infinite}
+@keyframes rise{to{transform:translate(50px,-125vh) rotate(40deg)}}
+.card{position:relative}.card:has(#ar){overflow:hidden}
+.rp{position:absolute;width:260px;height:260px;border:6px solid var(--cb);border-radius:50%;pointer-events:none;z-index:5}
+.pl{position:absolute;pointer-events:none;z-index:6;font:600 11px/1 var(--sans2);letter-spacing:.09em;text-transform:uppercase;color:#fff;background:var(--cb);padding:5px 8px}
+.apphd .hm>span{transform:none!important;transition:none!important}
+.apphd .hm i{display:inline-block;font-style:normal;transform:translateY(105%);transition:transform .9s var(--ease)}.apphd.in .hm i{transform:none}
+@media (prefers-reduced-motion:reduce){.bb{display:none}.apphd .hm i{transform:none}}
+.eqb div{margin-bottom:10px;font-size:13.5px}
+.eqb code{display:block;font:12.5px/1.6 ui-monospace,Menlo,Consolas,monospace;background:var(--soft);padding:6px 8px;margin:4px 0;overflow-x:auto;white-space:nowrap}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}.tbl td,.tbl th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right}.tbl td:first-child,.tbl th:first-child{text-align:left}
+.tbl th{font:600 10px/1 var(--sans2);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.score{display:flex;gap:16px;align-items:center;margin-bottom:10px}.score>b{font:400 58px/1 var(--serif)}
+.comp{display:grid;grid-template-columns:96px 1fr 34px;gap:8px;align-items:center;font-size:12.5px;margin:4px 0}.comp b{text-align:right}
+#cj{width:100%;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--card);color:var(--ink);border:1px solid var(--ink);border-radius:0;padding:8px;resize:vertical}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<header class="tb"><a class="lbl bx" href="https://claude.ai/artifact/2diVxqEeU92PsLC1y6weQr" target="_blank" rel="noopener">← Atlas</a><div class="lg"><b>EKOSISTEM</b><i>SIMULATOR RANTAI MAKANAN</i></div><a class="lbl bx" href="#app" id="go1">Mulai ↓</a></header>
+<section class="hero"><svg class="dia" id="dia" viewBox="0 0 200 200" aria-hidden="true"></svg>
+ <div class="hin">
+  <span class="lbl bx">Simulator / 2 sampai 5 spesies</span>
+  <h1 class="hh"><span class="hm"><span>Rantai makanan,</span></span><span class="hm"><span>yang <em>bernapas.</em></span></span></h1>
+  <p class="hp hm"><span>Susun sendiri ekosistemnya, ganti objeknya, lalu saksikan populasi saling menopang, bergejolak, atau punah.</span></p>
+  <div class="hrow" id="hrow"><a class="cta" href="#app" id="go2">Mulai simulasi ↓</a><span class="lbl bx">2–5 spesies</span><span class="lbl bx">11 kejadian</span><span class="lbl bx">4 ekosistem</span></div>
+ </div>
+ <div class="mq" aria-hidden="true"><div class="mqt" id="mqt"></div></div>
+</section>
+<div id="cur"><div class="r"></div><div class="d"></div><div class="l"></div></div>
+<div class="wrap" id="app">
+<div class="apphd" id="apphd"><h2 class="hm"><span>Ruang percobaan</span></h2><p>Klik arena untuk menambah nutrien, klik grafik untuk loncat ke hari tertentu, dan coba kejadian alam atau ulah manusia di bagian bawah.</p></div>
+<h1>Simulator ekosistem rantai makanan</h1>
+<p class="sub">Susun rantai makanan dari 2 sampai 5 spesies, ganti objeknya (laut, padang rumput, sawah, danau, atau nama dan emoji buatan sendiri), lalu lihat bagaimana populasi saling menopang, bergejolak, atau punah. Coba juga kejadian alam dan akibat ulah manusia.</p>
+<div class="card top">
+ <label>Ekosistem <span class="tabs2" id="thw"><span class="ind"></span><span id="th" style="display:contents"></span></span></label>
+ <label>Jumlah spesies <span class="tabs2" id="nw"><span class="ind"></span><span id="nn" style="display:contents"></span></span></label>
+ <label>Durasi <input type="range" id="dur" min="30" max="300" step="10" value="120" style="width:120px"><output id="odur">120</output> hari</label>
+ <label>Migrasi dari luar <input type="range" id="imm" min="0" max=".2" step=".005" value=".02" style="width:120px"><output id="oimm">0,02</output></label>
+ <label>Musim (amplitudo) <input type="range" id="sa" min="0" max=".8" step=".05" value="0" style="width:100px"><output id="osa">0</output></label>
+ <label>Periode musim <input type="range" id="sp2" min="20" max="120" step="5" value="60" style="width:100px"><output id="osp">60</output> hari</label>
+ <label>Derau lingkungan <input type="range" id="nz" min="0" max=".3" step=".01" value="0" style="width:100px"><output id="onz">0</output><button id="sd" type="button">Acak ulang</button></label>
+ <label><input type="checkbox" id="lg"> Skala log</label>
+ <button id="rs" type="button">Mulai ulang</button><button id="ra" type="button">Atur ulang semua</button>
+</div>
+<div class="layout">
+<aside>
+ <div class="card"><h2>Spesies</h2><p class="hint" style="margin:0 0 6px">Spesies 1 adalah produsen, tiap spesies berikutnya memangsa spesies sebelumnya. Ganti emoji, nama, dan warna sesuka Anda.</p><div id="cards"></div></div>
+</aside>
+<main>
+ <div class="card"><h3>Arena ekosistem</h3>
+  <canvas id="ar" role="img" aria-label="Animasi populasi spesies"></canvas>
+  <div class="ctrl"><button id="pl" type="button">Jeda</button><select id="sp" aria-label="Kecepatan"><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select><input type="range" id="sl" min="0" max="1000" value="0" aria-label="Waktu simulasi"><span id="tl"></span></div>
+  <div class="tk" id="tk"></div>
+ </div>
+ <div class="g2">
+  <div class="card"><h3>Biomassa terhadap waktu</h3><div class="chips" id="chips"></div><canvas id="tsc" role="img" aria-label="Grafik biomassa semua spesies"></canvas>
+   <div class="ctrl"><button id="gs" type="button">Simpan jejak pembanding</button><button id="gc" type="button">Hapus jejak</button><button id="csv" type="button">Unduh CSV</button><button id="png" type="button">Unduh PNG</button></div>
+   <p class="hint">Klik atau geser di grafik untuk loncat ke hari tertentu. Garis putus-putus adalah pembanding (tanpa kejadian atau jejak yang disimpan). Unduhan berfungsi saat halaman dibuka dari berkas sendiri atau GitHub Pages.</p></div>
+  <div class="card"><h3>Diagram fase</h3><div class="ctrl" style="margin:0 0 8px"><select id="px" aria-label="Sumbu x"></select><span style="min-width:0">terhadap</span><select id="py" aria-label="Sumbu y"></select></div><canvas id="ph" role="img" aria-label="Diagram fase dua spesies"></canvas></div>
+ </div>
+ <div class="g2">
+  <div class="card"><h3>Jaring makanan (aliran pemangsaan saat ini)</h3><canvas id="fw" role="img" aria-label="Jaring makanan"></canvas></div>
+  <div class="card"><h3>Status spesies</h3><div id="st"></div><p class="hint">Klik baris untuk menyembunyikan atau menampilkan spesies di grafik. Dianggap punah jika biomassa di bawah 0,5.</p></div>
+ </div>
+ <div class="card"><h3>Kejadian alam dan dampak manusia</h3><div class="evb" id="evb"></div><div id="evs"></div></div>
+ <div class="g2">
+  <div class="card"><h3>Analisis dan skor kesehatan</h3><div id="an"></div></div>
+  <div class="card"><h3>Persamaan model (nilai saat ini)</h3><div class="eqb" id="eqs"></div></div>
+ </div>
+ <div class="card"><h3>Diagram bifurkasi</h3><div class="ctrl" style="margin:0 0 8px"><select id="bs" aria-label="Spesies"></select><select id="bk" aria-label="Parameter"></select><button id="bg" type="button">Hitung</button></div><canvas id="bf" style="height:300px" role="img" aria-label="Diagram bifurkasi"></canvas><p class="hint" id="bh">Pilih parameter, lalu tekan Hitung. Parameter dikalikan 0,2 sampai 2 dari nilai sekarang, dan grafik menampilkan biomassa maksimum (garis tebal) dan minimum (putus-putus) pada 40% waktu terakhir. Jika keduanya berpisah, sistem berosilasi. Jika turun di bawah 0,1, spesies punah.</p></div>
+ <div class="card"><h3>Simpan dan bagikan konfigurasi</h3><textarea id="cj" rows="6" spellcheck="false" aria-label="Konfigurasi JSON"></textarea><div class="ctrl"><button id="ce" type="button">Ekspor</button><button id="cc" type="button">Salin</button><button id="ci" type="button">Muat dari kotak</button></div><p class="hint" id="cm">Ekspor menuliskan semua pengaturan (spesies, parameter, musim, derau) ke kotak ini. Tempel konfigurasi milik orang lain lalu tekan Muat.</p></div>
+</main>
+</div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fm=v=>v>=1000?Math.round(v).toLocaleString("id-ID"):v>=100?String(Math.round(v)):String(+v.toFixed(v<10?2:1)).replace(".",",");
+const mxf=a=>a.reduce((m,v)=>v>m?v:m,0),mnf=a=>a.reduce((m,v)=>v<m?v:m,Infinity);
+const TH={
+ laut:{n:"Laut",bg:["#11606b","#06222b"],s:[["Fitoplankton","🟢","#4fd08a"],["Zooplankton","🦐","#74a8ff"],["Ikan teri","🐟","#f5c542"],["Ikan tongkol","🐠","#ff8a4c"],["Hiu","🦈","#c084fc"]]},
+ padang:{n:"Padang rumput",bg:["#5a8f3c","#26431c"],s:[["Rumput","🌱","#4fd08a"],["Belalang","🦗","#a3e635"],["Katak","🐸","#22d3ee"],["Ular","🐍","#f59e0b"],["Elang","🦅","#c084fc"]]},
+ sawah:{n:"Sawah",bg:["#7a9a3a","#2f4a1f"],s:[["Padi","🌾","#facc15"],["Wereng","🐛","#a3e635"],["Laba-laba","🕷️","#fb7185"],["Katak","🐸","#22d3ee"],["Ular sawah","🐍","#f59e0b"]]},
+ danau:{n:"Danau",bg:["#2c6e8f","#0b2a3d"],s:[["Alga","🌿","#4fd08a"],["Kutu air","🦐","#74a8ff"],["Ikan mas","🐟","#f5c542"],["Ikan gabus","🐠","#ff8a4c"],["Bangau","🦢","#e9d5ff"]]}
+};
+const DEF=[{r:.6,K:300,N0:50},{a:.8,H:50,e:.3,m:.15,N0:10},{a:.675,H:28,e:.38,m:.021,N0:5},{a:.753,H:24,e:.35,m:.028,N0:2},{a:.31,H:16,e:.358,m:.026,N0:1}];
+const PR=i=>[["N0","Populasi awal",.5,300,.5],...(i?[["a","Laju makan maksimum",.05,1.5,.005],["H","Setengah jenuh (H)",1,80,.5],["e","Efisiensi konversi",.1,.6,.005],["m","Mortalitas alami",.005,.3,.001]]:[["r","Laju tumbuh",.1,1.2,.01],["K","Daya dukung (K)",50,600,5]]),["h","Penangkapan atau perburuan",0,.5,.005]];
+const CAP=[150,60,32,18,10],SZ=[12,18,22,26,32],SPD=[0,.8,.9,1,1.1];
+let th="laut",n=5,cache=null,GH=null,start=[],ACT=[],LOG=[],cf=0,ci=0,playing=!window.matchMedia("(prefers-reduced-motion: reduce)").matches,drag=false,last=0,lastSt="",lastTk="";
+const G={imm:.02,T:120,log:false,sa:0,sp:60,nz:0,seed:1,t:0},vis=[1,1,1,1,1],AG=[];
+const S=DEF.map(d=>({...d,h:0,name:"",emoji:"",color:""}));
+function applyTheme(k){th=k;TH[k].s.forEach((a,i)=>{S[i].name=a[0];S[i].emoji=a[1];S[i].color=a[2]});$("#ar").style.background=`linear-gradient(${TH[k].bg[0]},${TH[k].bg[1]})`}
+function fvec(y){
+ const g=new Array(n+1).fill(0),d=new Array(n);
+ for(let i=1;i<n;i++){const a=Math.max(y[i-1],0);g[i]=S[i].a*a/(S[i].H+a)*Math.max(y[i],0)}
+ d[0]=S[0].r*(1+G.sa*Math.sin(6.2832*G.t/G.sp))*y[0]*(1-y[0]/S[0].K)-g[1]+G.imm-S[0].h*y[0];
+ for(let i=1;i<n;i++)d[i]=S[i].e*g[i]-S[i].m*y[i]-g[i+1]+G.imm-S[i].h*y[i];
+ return d;
+}
+function sim(y0){
+ const dt=.025,N=Math.round(G.T/dt),rnd=mb(G.seed);let y=y0.slice();const Y=[y.slice()],t=[0];
+ for(let s=1;s<=N;s++){G.t=(s-1)*dt;
+  const k1=fvec(y),k2=fvec(y.map((v,i)=>v+dt/2*k1[i])),k3=fvec(y.map((v,i)=>v+dt/2*k2[i])),k4=fvec(y.map((v,i)=>v+dt*k3[i]));
+  y=y.map((v,i)=>Math.max(0,v+dt/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i])));if(G.nz>0)y=y.map(v=>Math.max(0,v*(1+G.nz*Math.sqrt(dt)*gs(rnd))));
+  if(s%4===0){Y.push(y.slice());t.push(s*dt)}
+ }
+ const C=Array.from({length:n},(_,i)=>Y.map(r=>r[i]));
+ return {t,Y,C,mx:C.map(mxf),mn:C.map(mnf)};
+}
+function calcLog(){
+ LOG=[];
+ for(let i=0;i<n;i++){let al=cache.C[i][0]>=.5;
+  for(let k=1;k<cache.t.length;k+=3){const v=cache.C[i][k];
+   if(al&&v<.5){al=false;LOG.push({t:cache.t[k],h:`💀 <b>${esc(S[i].emoji+" "+S[i].name)}</b> punah pada hari ${fm(cache.t[k])}`})}
+   else if(!al&&v>1){al=true;LOG.push({t:cache.t[k],h:`🌱 <b>${esc(S[i].emoji+" "+S[i].name)}</b> muncul kembali pada hari ${fm(cache.t[k])}`})}}}
+ LOG.sort((a,b)=>a.t-b.t);
+}
+function evInfo(){
+ let h="";
+ if(ACT.length&&GH)h=`<div class="evi cmpx"><b>Dampak dibanding tanpa kejadian (minimum / maksimum):</b><br>`+S.slice(0,n).map((s,i)=>`${s.emoji} ${fm(cache.mn[i])} / ${fm(cache.mx[i])} (tanpa kejadian: ${fm(mnf(GH.C[i]))} / ${fm(mxf(GH.C[i]))})`).join("<br>")+"</div>";
+ $("#evs").innerHTML=h;
+}
+function recalc(){
+ cache=sim(start);cf=Math.min(cf,cache.t.length-1);calcLog();evInfo();lastSt="";lastTk="";render();
+}
+function restart(){start=S.slice(0,n).map(s=>s.N0);cf=0;recalc()}
+function syncSl(){
+ document.querySelectorAll("#cards input[type=range]").forEach(t=>{const i=+t.dataset.i,k=t.dataset.k;t.value=S[i][k];$("#o"+i+k).textContent=fm(S[i][k])});
+ $("#imm").value=G.imm;$("#oimm").textContent=fm(G.imm);
+}
+function sc(i,k,f){const r=PR(i).find(a=>a[0]===k);S[i][k]=+Math.min(r[3],Math.max(r[2],S[i][k]*f)).toFixed(4)}
+function perturb(fn,lab){
+ if(!cache)return;
+ const y=cache.Y[ci].slice();
+ GH=sim(y);fn(y);start=y.map(v=>Math.max(v,0));
+ ACT.push(lab);cf=0;playing=true;sync();syncSl();recalc();
+}
+const EV=[
+{g:0,i:"🌊",n:"Pulsa nutrien",d:"Nutrien naik dari dasar atau sungai: produsen melonjak, lalu konsumen menyusul secara berantai.",fn:y=>{y[0]*=2.5}},
+{g:0,i:"⛈️",n:"Badai atau bencana",d:"Gangguan besar menghilangkan sebagian besar individu di semua spesies.",fn:y=>{for(let i=0;i<n;i++)y[i]*=.5}},
+{g:0,i:"🏜️",n:"Kekeringan",d:"Sumber daya menyusut: laju tumbuh produsen dan daya dukung turun.",fn:y=>{sc(0,"r",.6);sc(0,"K",.7)}},
+{g:0,i:"🦠",n:"Wabah penyakit",d:"Penyakit menyerang konsumen tingkat tengah dan menurunkan populasinya.",fn:y=>{y[Math.min(2,n-1)]*=.3}},
+{g:1,i:"🌾",n:"Pupuk dan limbah nutrien",d:"Lingkungan diperkaya (eutrofikasi): daya dukung naik, populasi meledak, lalu konsumen menekannya dan osilasi makin tajam.",fn:y=>{sc(0,"K",1.6);sc(0,"r",1.2);y[0]*=1.5}},
+{g:1,i:"🎣",n:"Penangkapan atau perburuan puncak",d:"Pemangsa puncak anjlok dan terus ditangkap, sehingga spesies di bawahnya bisa melonjak (efek berantai).",fn:y=>{y[n-1]*=.2;S[n-1].h=Math.min(.5,S[n-1].h+.1)}},
+{g:1,i:"🛢️",n:"Pencemaran racun",d:"Racun membunuh banyak individu seketika dan menaikkan mortalitas semua konsumen.",fn:y=>{for(let i=0;i<n;i++){y[i]*=.4;if(i)sc(i,"m",1.3)}}},
+{g:1,i:"🌡️",n:"Pemanasan",d:"Suhu naik mempercepat metabolisme: tumbuh, makan, dan mati semuanya lebih cepat.",fn:y=>{sc(0,"r",1.2);for(let i=1;i<n;i++){sc(i,"a",1.3);sc(i,"m",1.3)}}},
+{g:1,i:"🧪",n:"Pestisida",d:"Racun hama membunuh herbivora dan melemahkan efisiensinya.",fn:y=>{y[1]*=.3;sc(1,"e",.7)}},
+{g:1,i:"🏗️",n:"Perusakan habitat",d:"Habitat menyempit: daya dukung produsen turun dan migrasi dari luar terhenti.",fn:y=>{sc(0,"K",.6);G.imm=0}},
+{g:1,i:"🐾",n:"Spesies invasif",d:"Pendatang baru memangsa lebih rakus di tingkat tengah: herbivora membengkak dan laju makannya naik.",fn:y=>{y[1]*=3;sc(1,"a",1.3)}}
+];
+function build(){
+ $("#th").innerHTML=Object.entries(TH).map(([k,v])=>`<button type="button" data-k="${k}" class="${k===th?"on":""}">${v.n}</button>`).join("");
+ $("#nn").innerHTML=[2,3,4,5].map(k=>`<button type="button" class="${k===n?"on":""}" data-n="${k}">${k}</button>`).join("");
+ $("#cards").innerHTML=S.slice(0,n).map((s,i)=>`<details class="sp"${i<2?" open":""}><summary><i style="background:${s.color}" id="dot${i}"></i><span id="sn${i}">${esc(s.emoji)} ${esc(s.name)}</span></summary><div class="bd"><div class="row"><input type="text" class="em" data-i="${i}" data-k="emoji" value="${esc(s.emoji)}" maxlength="4" aria-label="Emoji spesies ${i+1}"><input type="text" data-i="${i}" data-k="name" value="${esc(s.name)}" aria-label="Nama spesies ${i+1}"><input type="color" data-i="${i}" data-k="color" value="${s.color}" aria-label="Warna"></div>`+PR(i).map(a=>`<div class="ctl"><label for="r${i}${a[0]}">${a[1]}<output id="o${i}${a[0]}">${fm(s[a[0]])}</output></label><input type="range" id="r${i}${a[0]}" data-i="${i}" data-k="${a[0]}" min="${a[2]}" max="${a[3]}" step="${a[4]}" value="${s[a[0]]}"></div>`).join("")+`<div class="row"><button type="button" data-poke="${i}" data-f="1.5">+50%</button><button type="button" data-poke="${i}" data-f=".5">−50%</button><button type="button" data-poke="${i}" data-f="0">Hapus</button></div></div></details>`).join("");
+ const ops=S.slice(0,n).map((s,i)=>`<option value="${i}">${esc(s.emoji)} ${esc(s.name)}</option>`).join("");
+ $("#px").innerHTML=ops;$("#py").innerHTML=ops;$("#px").value=0;$("#py").value=1;
+ chips();
+ $("#evb").innerHTML=[["Kejadian alam",0],["Akibat ulah manusia (antropogenik)",1]].map(([t,g])=>`<div class="grp">${t}</div>`+EV.map((e,i)=>e.g===g?`<button type="button" data-ev="${i}" title="${e.d}">${e.i} ${e.n}</button>`:"").join("")).join("");
+}
+function chips(){
+ $("#chips").innerHTML=S.slice(0,n).map((s,i)=>`<button type="button" class="chip${vis[i]?"":" off"}" data-i="${i}"><i style="background:${s.color}"></i>${esc(s.emoji)} ${esc(s.name)}</button>`).join("");
+}
+const tk=m=>{m=m||1;const s0=m/5,e=Math.pow(10,Math.floor(Math.log10(s0))),f=s0/e,s=(f<=1?1:f<=2?2:f<=5?5:10)*e;return {s,max:Math.ceil(m/s-1e-9)*s}};
+function plot(cv,o){
+ const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+ if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+ const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+ const css=getComputedStyle(document.documentElement),cl=v=>v[0]==="-"?css.getPropertyValue(v).trim():v;
+ const L=50,R=12,Tp=10,B=36,pw=w-L-R,ph=h-Tp-B,xt=tk(o.xmax);
+ let tks=[],Y;
+ if(o.log){const hi=Math.max(1,Math.ceil(Math.log10(Math.max(o.ymax,1.01))));for(let e=-1;e<=hi;e++)tks.push(Math.pow(10,e));Y=v=>Tp+ph-(Math.log10(Math.max(v,.1))+1)/(hi+1)*ph}
+ else{const yt=tk(o.ymax);for(let v=0;v<=yt.max+1e-9;v+=yt.s)tks.push(v);Y=v=>Tp+ph-v/yt.max*ph}
+ const X=v=>L+v/xt.max*pw;
+ x.font="12px 'Instrument Sans',system-ui,sans-serif";x.lineWidth=1;
+ for(const v of tks){const y=Y(v);x.strokeStyle=cl("--grid");x.beginPath();x.moveTo(L,y);x.lineTo(L+pw,y);x.stroke();x.fillStyle=cl("--mute");x.textAlign="right";x.fillText(fm(v),L-6,y+4)}
+ for(let v=0;v<=xt.max+1e-9;v+=xt.s){x.strokeStyle=cl("--grid");x.beginPath();x.moveTo(X(v),Tp);x.lineTo(X(v),Tp+ph);x.stroke();x.fillStyle=cl("--mute");x.textAlign="center";x.fillText(fm(v),X(v),Tp+ph+16)}
+ x.strokeStyle=cl("--line");x.strokeRect(L,Tp,pw,ph);
+ x.fillStyle=cl("--mute");x.textAlign="center";x.fillText(o.xl,L+pw/2,h-6);
+ x.save();x.translate(12,Tp+ph/2);x.rotate(-Math.PI/2);x.fillText(o.yl,0,0);x.restore();
+ x.lineJoin="round";
+ for(const s of o.s){x.strokeStyle=cl(s.c);x.globalAlpha=s.a||1;x.lineWidth=s.w||1.8;x.setLineDash(s.d||[]);x.beginPath();s.xs.forEach((v,i)=>{const px=X(v),py=Y(s.ys[i]);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke()}
+ x.setLineDash([]);x.globalAlpha=1;
+ if(o.vt!=null){x.strokeStyle=cl("--ink");x.lineWidth=1;x.setLineDash([4,4]);x.beginPath();x.moveTo(X(o.vt),Tp);x.lineTo(X(o.vt),Tp+ph);x.stroke();x.setLineDash([])}
+ for(const q of o.mk||[]){x.beginPath();x.arc(X(q.x),Y(q.y),q.big?6:5,0,7);x.fillStyle=cl(q.c);x.fill();x.strokeStyle=cl("--card");x.lineWidth=2;x.stroke()}
+}
+function drawTS(){
+ const C=cache.C,idx=S.slice(0,n).map((_,i)=>i).filter(i=>vis[i]);
+ let ym=1;for(const i of idx)ym=Math.max(ym,cache.mx[i],GH?mxf(GH.C[i]):0);
+ plot($("#tsc"),{xmax:G.T,ymax:ym,log:G.log,xl:"Waktu (hari)",yl:G.log?"Biomassa (skala log)":"Biomassa (mg C/m³)",vt:cache.t[ci],
+  s:[...(GH?idx.map(i=>({xs:GH.t,ys:GH.C[i],c:S[i].color,d:[5,4],a:.55})):[]),...idx.map(i=>({xs:cache.t,ys:C[i],c:S[i].color,w:2.4}))],
+  mk:idx.map(i=>({x:cache.t[ci],y:C[i][ci],c:S[i].color}))});
+}
+function drawPH(){
+ const a=+$("#px").value||0,b=+$("#py").value||0,C=cache.C;
+ plot($("#ph"),{xmax:Math.max(cache.mx[a],GH?mxf(GH.C[a]):0,1),ymax:Math.max(cache.mx[b],GH?mxf(GH.C[b]):0,1),xl:S[a].name,yl:S[b].name,
+  s:[...(GH?[{xs:GH.C[a],ys:GH.C[b],c:"--mute",d:[5,4]}]:[]),{xs:C[a],ys:C[b],c:S[b].color,w:2}],
+  mk:[{x:C[a][0],y:C[b][0],c:"--ok"},{x:C[a][ci],y:C[b][ci],c:"--ink",big:1}]});
+}
+function sized(cv){const dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}const x=cv.getContext("2d");x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);return [x,w,h]}
+function drawArena(){
+ const [x,w,h]=sized($("#ar")),y=cache.Y[ci];
+ for(let i=0;i<n;i++){
+  const ref=cache.mx[i]||1,cnt=y[i]<.5?0:Math.max(1,Math.round(y[i]/ref*CAP[i])),A=AG[i]||(AG[i]=[]);
+  while(A.length<cnt)A.push({x:Math.random()*w,y:Math.random()*h,vx:0,vy:0,a:Math.random()*6.28,tx:0,ty:0,nr:0});
+  A.length=cnt;
+ }
+ AG.length=n;
+ x.textAlign="center";x.textBaseline="middle";
+ for(let i=0;i<n;i++){
+  const A=AG[i],pr=i?AG[i-1]:null;x.font=SZ[i]+"px serif";
+  for(const a of A){
+   if(playing){
+    if(!i){a.a+=.03;a.vx=Math.cos(a.a)*.25;a.vy=Math.sin(a.a*.7)*.25}
+    else{let best=null,bd=1e9;for(const b of pr){const d=(b.x-a.x)**2+(b.y-a.y)**2;if(d<bd){bd=d;best=b}}
+     a.nr=0;if(best){const d=Math.sqrt(bd)||1;a.vx+=(best.x-a.x)/d*.05*SPD[i];a.vy+=(best.y-a.y)/d*.05*SPD[i];if(d<SZ[i]*2.2){a.nr=1;a.tx=best.x;a.ty=best.y}}
+     a.vx=a.vx*.94+(Math.random()-.5)*.12;a.vy=a.vy*.94+(Math.random()-.5)*.12}
+    a.x=(a.x+a.vx+w)%w;a.y=(a.y+a.vy+h)%h;
+   }
+   if(a.nr){x.strokeStyle="rgba(255,184,102,.8)";x.lineWidth=1.5;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(a.tx,a.ty);x.stroke()}
+   x.fillText(S[i].emoji,a.x,a.y);
+  }
+ }
+ x.textAlign="left";x.textBaseline="alphabetic";x.font="600 13px 'Instrument Sans',system-ui,sans-serif";x.fillStyle="#fff";
+ for(let i=0;i<n;i++)x.fillText(`${S[i].emoji} ${S[i].name}: ${fm(y[i])}`,12,22+18*i);
+ x.textAlign="right";x.fillText("Hari "+fm(cache.t[ci]),w-12,22);
+}
+function drawFW(){
+ const [x,w,h]=sized($("#fw")),y=cache.Y[ci],css=getComputedStyle(document.documentElement);
+ const fl=[0];for(let i=1;i<n;i++){const a=Math.max(y[i-1],0);fl[i]=S[i].a*a/(S[i].H+a)*y[i]}
+ const mg=Math.max(...fl,1e-6),mb=Math.max(...cache.mx,2),px=i=>(i+.5)/n*w,py=i=>n>1?h*.72-h*.46*i/(n-1):h/2;
+ for(let i=1;i<n;i++){
+  const x0=px(i-1),y0=py(i-1),x1=px(i),y1=py(i),ang=Math.atan2(y1-y0,x1-x0),lw=1.5+8*fl[i]/mg;
+  x.strokeStyle="rgba(215,109,11,.75)";x.lineWidth=lw;x.beginPath();x.moveTo(x0+Math.cos(ang)*30,y0+Math.sin(ang)*30);x.lineTo(x1-Math.cos(ang)*34,y1-Math.sin(ang)*34);x.stroke();
+  const ex=x1-Math.cos(ang)*32,ey=y1-Math.sin(ang)*32;x.fillStyle="rgba(215,109,11,.9)";x.beginPath();x.moveTo(ex,ey);x.lineTo(ex-Math.cos(ang-.5)*10,ey-Math.sin(ang-.5)*10);x.lineTo(ex-Math.cos(ang+.5)*10,ey-Math.sin(ang+.5)*10);x.fill();
+  x.fillStyle=css.getPropertyValue("--mute").trim();x.font="11.5px 'Instrument Sans',system-ui,sans-serif";x.textAlign="center";x.fillText(fm(fl[i])+"/hari",(x0+x1)/2,(y0+y1)/2-10);
+ }
+ for(let i=0;i<n;i++){
+  const r=13+14*Math.log10(1+y[i])/Math.log10(1+mb);
+  x.globalAlpha=y[i]<.5?.3:.9;x.fillStyle=S[i].color;x.beginPath();x.arc(px(i),py(i),r,0,7);x.fill();x.globalAlpha=1;
+  x.font=Math.round(r*1.1)+"px serif";x.textAlign="center";x.textBaseline="middle";x.fillStyle="#000";x.fillText(S[i].emoji,px(i),py(i)+1);
+  x.textBaseline="alphabetic";x.font="12px 'Instrument Sans',system-ui,sans-serif";x.fillStyle=css.getPropertyValue("--ink").trim();x.fillText(S[i].name+(S[i].h>0?" 🎣":""),px(i),py(i)+r+15);
+ }
+}
+function stats(){
+ const y=cache.Y[ci],p=cache.Y[Math.max(0,ci-10)];let h="",al=0;
+ for(let i=0;i<n;i++){
+  const v=y[i],st=v<.5?["punah","--rd"]:v<2?["langka","--or"]:["sehat","--ok"];if(v>=.5)al++;
+  h+=`<div class="srow${vis[i]?"":" off"}" data-i="${i}"><span>${esc(S[i].emoji)} ${esc(S[i].name)}</span><b>${fm(v)}</b><span class="pb"><i style="width:${Math.min(100,v/(cache.mx[i]||1)*100)}%;background:${S[i].color}"></i></span><em style="color:var(${st[1]})">${v>p[i]+1e-3?"▲":v<p[i]-1e-3?"▼":"–"} ${st[0]}</em></div>`;
+ }
+ h=`<p class="sum">${al} dari ${n} spesies bertahan.</p>`+h;
+ if(h!==lastSt){$("#st").innerHTML=h;lastSt=h}
+}
+function ticker(){
+ const d=cache.t[ci],it=[...ACT.map(a=>`${a.i} <b>${a.n}.</b> ${a.d}`),...LOG.filter(l=>l.t<=d).map(l=>l.h)].slice(-6);
+ const h=it.map(s=>`<div>${s}</div>`).join("");
+ if(h!==lastTk){$("#tk").innerHTML=h;lastTk=h}
+}
+function render(){
+ if(!cache)return;
+ ci=Math.min(Math.floor(cf),cache.t.length-1);
+ drawArena();drawTS();drawPH();drawFW();stats();ticker();
+ $("#tl").textContent="Hari "+fm(cache.t[ci])+" / "+G.T;$("#sl").value=Math.round(ci/(cache.t.length-1)*1000);
+}
+function sync(){$("#pl").textContent=playing?"Jeda":"Putar"}
+function tick(ts){
+ const dt=Math.min(.1,(ts-last)/1000);last=ts;
+ if(playing&&cache&&!document.hidden){cf+=dt*120*(+$("#sp").value);if(cf>=cache.t.length-1)cf=0;render()}
+ requestAnimationFrame(tick);
+}
+function scrub(e){if(!cache)return;const r=$("#tsc").getBoundingClientRect();cf=Math.min(1,Math.max(0,(e.clientX-r.left-50)/(r.width-62)))*(cache.t.length-1);playing=false;sync();render()}
+function dl(name,blob){try{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove()}catch(e){}}
+$("#tsc").addEventListener("pointerdown",e=>{drag=true;e.target.setPointerCapture(e.pointerId);scrub(e)});
+$("#tsc").addEventListener("pointermove",e=>{if(drag)scrub(e)});
+$("#tsc").addEventListener("pointerup",()=>{drag=false});
+$("#sl").addEventListener("input",e=>{if(!cache)return;cf=e.target.value/1000*(cache.t.length-1);playing=false;sync();render()});
+$("#pl").addEventListener("click",()=>{playing=!playing;sync();render()});
+$("#sp").addEventListener("change",()=>{playing=true;sync()});
+$("#th").addEventListener("click",e=>{const b=e.target.closest("button");if(b){applyTheme(b.dataset.k);build();lastSt="";render()}});
+$("#nn").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;n=+b.dataset.n;ACT=[];GH=null;build();restart()});
+$("#dur").addEventListener("input",e=>{G.T=+e.target.value;$("#odur").textContent=G.T;GH=null;ACT=[];recalc()});
+$("#imm").addEventListener("input",e=>{G.imm=+e.target.value;$("#oimm").textContent=fm(G.imm);GH=null;ACT=[];recalc()});
+$("#lg").addEventListener("change",e=>{G.log=e.target.checked;render()});
+$("#rs").addEventListener("click",()=>{ACT=[];GH=null;restart()});
+$("#ra").addEventListener("click",()=>{S.forEach((s,i)=>Object.assign(s,DEF[i],{h:0}));G.imm=.02;G.T=120;$("#dur").value=120;$("#odur").textContent=120;ACT=[];GH=null;build();syncSl();restart()});
+$("#gs").addEventListener("click",()=>{if(cache){GH={t:cache.t,C:cache.C.map(a=>a.slice())};render()}});
+$("#gc").addEventListener("click",()=>{GH=null;ACT=[];evInfo();lastTk="";render()});
+$("#csv").addEventListener("click",()=>{if(!cache)return;let c="hari,"+S.slice(0,n).map(s=>s.name.replace(/,/g," ")).join(",")+"\n";cache.t.forEach((t,k)=>{c+=t.toFixed(1)+","+cache.Y[k].map(v=>v.toFixed(3)).join(",")+"\n"});dl("ekosistem.csv",new Blob([c],{type:"text/csv"}))});
+$("#png").addEventListener("click",()=>$("#tsc").toBlob(b=>b&&dl("grafik-ekosistem.png",b)));
+$("#px").addEventListener("change",render);$("#py").addEventListener("change",render);
+$("#chips").addEventListener("click",e=>{const b=e.target.closest("button");if(b){vis[+b.dataset.i]^=1;chips();lastSt="";render()}});
+$("#st").addEventListener("click",e=>{const r=e.target.closest(".srow");if(r){vis[+r.dataset.i]^=1;chips();lastSt="";render()}});
+$("#evb").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const ev=EV[+b.dataset.ev];perturb(ev.fn,{i:ev.i,n:ev.n,d:ev.d})});
+$("#cards").addEventListener("input",e=>{
+ const t=e.target,i=+t.dataset.i,k=t.dataset.k;if(k===undefined)return;
+ if(t.type==="range"){S[i][k]=+t.value;$("#o"+i+k).textContent=fm(S[i][k]);GH=null;ACT=[];if(k==="N0")restart();else recalc()}
+ else{S[i][k]=t.value;$("#sn"+i).textContent=S[i].emoji+" "+S[i].name;$("#dot"+i).style.background=S[i].color;chips();lastSt="";lastTk="";render()}
+});
+$("#cards").addEventListener("click",e=>{
+ const b=e.target.closest("[data-poke]");if(!b)return;
+ const i=+b.dataset.poke,f=+b.dataset.f,s=S[i];
+ perturb(y=>{y[i]=f===0?0:Math.max(.5,y[i]*f+(f>1?1:0))},{i:"🖐️",n:`${s.emoji} ${s.name} ${f===0?"dihapus":f>1?"+50%":"−50%"}`,d:"Populasi diubah tiba-tiba, lalu simulasi dilanjutkan dari kondisi ini."});
+});
+document.addEventListener("keydown",e=>{if(e.code==="Space"&&!/INPUT|SELECT|BUTTON|TEXTAREA|SUMMARY/.test(e.target.tagName)){e.preventDefault();playing=!playing;sync();render()}});
+window.addEventListener("resize",render);
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+const RMv=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const _build=build;build=function(){_build();slides()};
+function slides(){["thw","nw"].forEach(id=>{const w=$("#"+id),b=w.querySelector("button.on"),i=w.querySelector(".ind");if(b&&i){i.style.width=b.offsetWidth+"px";i.style.transform=`translateX(${b.offsetLeft}px)`}})}
+addEventListener("resize",slides);if(document.fonts&&document.fonts.ready)document.fonts.ready.then(slides);
+(function(){
+ let g="";for(const r of [96,70,44,18])g+=`<circle cx="100" cy="100" r="${r}" fill="none" stroke="currentColor" stroke-width=".5"/>`;
+ for(let k=0;k<72;k++){const a=k/72*6.2832,c=Math.cos(a),s=Math.sin(a),r1=k%2?44:18;g+=`<line x1="${100+c*r1}" y1="${100+s*r1}" x2="${100+c*96}" y2="${100+s*96}" stroke="currentColor" stroke-width=".4"/>`}
+ $("#dia").innerHTML=g;
+ const t="🟢 Produsen → 🦐 Herbivora → 🐟 Karnivora → 🦈 Pemangsa puncak → 🌊 Pulsa nutrien → 🎣 Penangkapan berlebih → 🌡️ Pemanasan → ";
+ $("#mqt").innerHTML=`<span>${t}</span>`.repeat(4);
+ const E="cubic-bezier(.2,.8,.2,1)";
+ document.querySelectorAll(".hero .hm>span").forEach((s,i)=>{if(!RMv)s.animate([{transform:"translateY(105%)"},{transform:"translateY(0)"}],{duration:900,delay:200+i*110,easing:E,fill:"both"})});
+ if(!RMv)$("#hrow").animate([{clipPath:"inset(0 100% 0 0)"},{clipPath:"inset(0 0 0 0)"}],{duration:900,delay:750,easing:E,fill:"both"});
+ for(const id of ["go1","go2"])$("#"+id).addEventListener("click",e=>{e.preventDefault();$("#app").scrollIntoView({behavior:RMv?"auto":"smooth"})});
+ const cards=[...document.querySelectorAll(".top,.card")];cards.forEach(c=>c.classList.add("rv"));
+ const all=[...cards,$("#apphd")];
+ const todo=new Set(all),reveal=()=>{const lim=innerHeight*.92;let k=0;for(const e of todo)if(e.getBoundingClientRect().top<lim){e.style.transitionDelay=(k++*90)+"ms";e.classList.add("in");todo.delete(e)}};
+ if(RMv)all.forEach(e=>e.classList.add("in"));else{(function poll(){reveal();if(todo.size)requestAnimationFrame(poll)})();setTimeout(()=>all.forEach(e=>e.classList.add("in")),8000)}
+ $("#ar").dataset.cur="BERI<br>NUTRIEN";$("#tsc").dataset.cur="GESER";
+ $("#ar").addEventListener("click",()=>perturb(y=>{y[0]=y[0]*1.4+10},{i:"🫧",n:"Nutrien ditambahkan",d:"Anda menambah nutrien di arena: produsen melonjak, lalu rantai di atasnya menyusul."}));
+ if(matchMedia("(pointer:fine)").matches){
+  const c=$("#cur"),l=c.querySelector(".l");let x=innerWidth/2,y=innerHeight/2,px=x,py=y,last=null;
+  addEventListener("pointermove",e=>{x=e.clientX;y=e.clientY;const t=e.target,cd=t.closest&&t.closest("[data-cur]");
+   c.classList.toggle("open",!!cd);if(cd&&cd!==last){l.innerHTML=cd.dataset.cur;last=cd}
+   c.classList.toggle("btn",!cd&&!!(t.closest&&t.closest("button,a,summary,input,select,label")))});
+  (function f(){px+=(x-px)*.22;py+=(y-py)*.22;c.style.transform=`translate3d(${px}px,${py}px,0)`;requestAnimationFrame(f)})();
+ }
+})();
+(function(){
+ const E="cubic-bezier(.2,.8,.2,1)",pg=document.createElement("div");pg.id="pg";document.body.appendChild(pg);
+ const hero=document.querySelector(".hero"),em=["🟢","🦐","🐟","🦈","🌿","🐛","🦗","🐠"];
+ for(let i=0;i<14;i++){const b=document.createElement("span");b.className="bb";b.textContent=em[i%em.length];b.style.cssText=`left:${5+(i*37)%88}%;font-size:${16+(i*7)%22}px;animation-duration:${14+(i*5)%12}s;animation-delay:${-(i*3.1)}s`;hero.appendChild(b)}
+ const h=document.querySelector("#apphd h2>span");h.innerHTML=[...h.textContent].map((c,i)=>`<i style="transition-delay:${i*35}ms">${c===" "?"&nbsp;":c}</i>`).join("");
+ document.querySelectorAll("#hrow .bx").forEach(el=>{const m=el.textContent.match(/^(\d+)(.*)$/);if(!m||RMv)return;const to=+m[1],t0=performance.now()+900;(function f(){const p=Math.min(1,Math.max(0,(performance.now()-t0)/1200));el.textContent=Math.round(to*(1-Math.pow(1-p,3)))+m[2];if(p<1)requestAnimationFrame(f)})()});
+ const cta=$("#go2");cta.style.transition="transform .35s "+E+",background .3s,color .3s";
+ if(!RMv)addEventListener("pointermove",e=>{const r=cta.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);cta.style.transform=Math.hypot(dx,dy)<130?`translate(${dx*.25}px,${dy*.35}px)`:""});
+ let ly=scrollY,rate=1;const mq=$("#mqt"),hin=document.querySelector(".hin"),dia=$("#dia");
+ (function loop(){
+  const y=scrollY,v=Math.abs(y-ly),yy=Math.min(y,innerHeight);ly=y;
+  pg.style.transform=`scaleX(${y/Math.max(1,document.documentElement.scrollHeight-innerHeight)})`;
+  if(!RMv){hin.style.transform=`translateY(${yy*.12}px)`;dia.style.marginTop=yy*.25+"px";
+   const a=mq.getAnimations&&mq.getAnimations()[0];if(a&&a.updatePlaybackRate){rate+=((1+Math.min(8,v*.5))-rate)*.1;a.updatePlaybackRate(rate)}}
+  requestAnimationFrame(loop);
+ })();
+ $("#ar").addEventListener("click",e=>{
+  if(RMv)return;const card=$("#ar").parentElement,cr=card.getBoundingClientRect(),x=e.clientX-cr.left,y=e.clientY-cr.top;
+  for(let k=0;k<3;k++){const r=document.createElement("i");r.className="rp";r.style.left=x+"px";r.style.top=y+"px";card.appendChild(r);r.animate([{transform:"translate(-50%,-50%) scale(0)",borderWidth:"8px"},{transform:"translate(-50%,-50%) scale(1.6)",borderWidth:"1px"}],{duration:1100,delay:k*160,easing:E,fill:"both"}).onfinish=()=>r.remove()}
+  const t=document.createElement("b");t.className="pl";t.textContent="+ nutrien";t.style.left=x+"px";t.style.top=y+"px";card.appendChild(t);
+  t.animate([{transform:"translate(-50%,0)",clipPath:"inset(0)"},{offset:.7,clipPath:"inset(0)"},{transform:"translate(-50%,-70px)",clipPath:"inset(0 0 100% 0)"}],{duration:1300,easing:E,fill:"both"}).onfinish=()=>t.remove();
+ });
+ const _pt=perturb;perturb=function(fn,lab){_pt(fn,lab);if(!RMv)$("#ar").animate([{transform:"scale(1)"},{transform:"scale(1.012)"},{transform:"scale(1)"}],{duration:520,easing:E})};
+})();
+const mb=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const gs=r=>Math.sqrt(-2*Math.log(r()+1e-12))*Math.cos(6.2832*r()),SUB="₁₂₃₄₅";
+function analyze(){
+ const L=cache.t.length,k0=L>>1;let rows="",cvs=[],alive=0,ever=0;
+ for(let i=0;i<n;i++){
+  const a=cache.C[i],seg=a.slice(k0),m=seg.reduce((p,v)=>p+v,0)/seg.length,sd=Math.sqrt(seg.reduce((p,v)=>p+(v-m)**2,0)/seg.length),cv=m>.5?sd/m:0,all=a.reduce((p,v)=>p+v,0)/L,pk=[];
+  for(let k=20;k<L-20;k++){let ok=a[k]>all&&a[k]>1;for(let j=k-20;ok&&j<=k+20;j++)if(a[j]>a[k]||(a[j]===a[k]&&j<k))ok=false;if(ok)pk.push(cache.t[k])}
+  const per=pk.length>1?(pk[pk.length-1]-pk[0])/(pk.length-1):0;
+  if(a[L-1]>=.5)alive++;if(cache.mn[i]<.5)ever++;if(m>.5)cvs.push(cv);
+  rows+=`<tr><td>${esc(S[i].emoji+" "+S[i].name)}</td><td>${fm(m)}</td><td>${fm(cache.mn[i])}</td><td>${fm(cache.mx[i])}</td><td>${Math.round(cv*100)}%</td><td>${per?fm(per):"–"}</td></tr>`;
+ }
+ const kek=alive/n,kon=(n-ever)/n,kes=1-Math.min(1,(cvs.length?cvs.reduce((p,v)=>p+v,0)/cvs.length:1)/.8),sc=Math.round(100*(.4*kek+.3*kon+.3*kes)),lab=sc>=75?["Sehat","--ok"]:sc>=45?["Rentan","--or"]:["Kritis","--rd"];
+ const bar=(t,v)=>`<div class="comp"><span>${t}</span><span class="pb"><i style="width:${Math.round(v*100)}%;background:var(--cb)"></i></span><b>${Math.round(v*100)}</b></div>`;
+ $("#an").innerHTML=`<div class="score"><b style="color:var(${lab[1]})">${sc}</b><div><div class="lbl">${lab[0]}</div><div class="hint" style="margin:2px 0 0">Skor kesehatan ekosistem (0 sampai 100)</div></div></div>`+bar("Kekayaan",kek)+bar("Kontinuitas",kon)+bar("Kestabilan",kes)+`<table class="tbl"><tr><th>Spesies</th><th>Rata-rata</th><th>Min</th><th>Maks</th><th>CV</th><th>Periode</th></tr>${rows}</table><p class="hint">Rata-rata dan CV dihitung dari separuh akhir simulasi. Periode adalah jarak rata-rata antar puncak (hari). Kekayaan: spesies yang hidup di akhir. Kontinuitas: spesies yang tidak pernah punah. Kestabilan: rendahnya fluktuasi.</p>`;
+ const q=[],sa=G.sa>0?`; r(t) = r·(1 + ${fm(G.sa)}·sin(2πt/${G.sp}))`:"",nz=G.nz>0?`; derau lingkungan σ = ${fm(G.nz)}`:"";
+ for(let i=0;i<n;i++){
+  const s=S[i],N=`N${SUB[i]}`,g=`g${SUB[i]}`,hh=s.h>0?` − ${fm(s.h)}·${N}`:"";
+  q.push(`<div><b>${esc(s.emoji+" "+s.name)}</b>`+(i?`<code>${g} = ${fm(s.a)}·N${SUB[i-1]}/(${fm(s.H)} + N${SUB[i-1]})·${N}</code><code>d${N}/dt = ${fm(s.e)}·${g} − ${fm(s.m)}·${N}${i<n-1?` − g${SUB[i+1]}`:""} + ${fm(G.imm)}${hh}</code>`:`<code>d${N}/dt = ${fm(s.r)}·${N}·(1 − ${N}/${fm(s.K)})${n>1?` − g${SUB[1]}`:""} + ${fm(G.imm)}${hh}</code>`)+"</div>");
+ }
+ $("#eqs").innerHTML=q.join("")+`<p class="hint">Migrasi dari luar I = ${fm(G.imm)} per hari${sa}${nz}. g adalah laju pemangsaan Holling Tipe II, dan setiap spesies memangsa spesies di atasnya pada daftar.</p>`;
+}
+const _rc=recalc;recalc=function(){_rc();analyze()};
+function fillK(keep){const i=+$("#bs").value||0;$("#bk").innerHTML=PR(i).filter(a=>a[0]!=="N0").map(a=>`<option value="${a[0]}">${a[1]}</option>`).join("");if(keep&&[...$("#bk").options].some(o=>o.value===keep))$("#bk").value=keep}
+function bfSel(){const bs=$("#bs"),pv=bs.value||"0",pk=$("#bk").value;bs.innerHTML=S.slice(0,n).map((s,i)=>`<option value="${i}">${esc(s.emoji+" "+s.name)}</option>`).join("");bs.value=+pv<n?pv:"0";fillK(pk)}
+const _bd=build;build=function(){_bd();bfSel()};
+$("#bs").addEventListener("change",()=>fillK());
+$("#bg").addEventListener("click",()=>{
+ const i=+$("#bs").value,k=$("#bk").value,orig=S[i][k],base=orig||(k==="h"?.1:1),T0=G.T,z0=G.nz,fs=Array.from({length:36},(_,j)=>.2+j*1.8/35),mx=S.slice(0,n).map(()=>[]),mn=S.slice(0,n).map(()=>[]);let top=1;
+ G.T=200;G.nz=0;
+ for(const f of fs){S[i][k]=base*f;const r=sim(start),k0=Math.floor(r.t.length*.6);for(let j=0;j<n;j++){const sg=r.C[j].slice(k0),a=mxf(sg);mx[j].push(a);mn[j].push(mnf(sg));if(a>top)top=a}}
+ S[i][k]=orig;G.T=T0;G.nz=z0;
+ plot($("#bf"),{xmax:2,ymax:top,log:true,xl:"Faktor parameter (× nilai sekarang)",yl:"Biomassa akhir (log)",vt:1,s:S.slice(0,n).flatMap((s,j)=>[{xs:fs,ys:mx[j],c:s.color,w:2.4},{xs:fs,ys:mn[j],c:s.color,d:[4,3],w:1.4}])});
+});
+function topSync(){[["dur","odur","T"],["imm","oimm","imm"],["sa","osa","sa"],["sp2","osp","sp"],["nz","onz","nz"]].forEach(([i,o,k])=>{$("#"+i).value=G[k];$("#"+o).textContent=fm(G[k])})}
+[["sa","osa","sa"],["sp2","osp","sp"],["nz","onz","nz"]].forEach(([i,o,k])=>$("#"+i).addEventListener("input",e=>{G[k]=+e.target.value;$("#"+o).textContent=fm(G[k]);GH=null;ACT=[];recalc()}));
+$("#sd").addEventListener("click",()=>{G.seed=Math.floor(Math.random()*1e6);recalc()});
+$("#ra").addEventListener("click",()=>{Object.assign(G,{sa:0,sp:60,nz:0,seed:1});topSync();restart()});
+const cfgGet=()=>JSON.stringify({v:1,theme:th,n,G:{imm:G.imm,T:G.T,sa:G.sa,sp:G.sp,nz:G.nz,seed:G.seed},S:S.slice(0,n).map(s=>({name:s.name,emoji:s.emoji,color:s.color,N0:s.N0,r:s.r,K:s.K,a:s.a,H:s.H,e:s.e,m:s.m,h:s.h}))},null,1);
+$("#ce").addEventListener("click",()=>{$("#cj").value=cfgGet();$("#cm").textContent="Konfigurasi diekspor ke kotak."});
+$("#cc").addEventListener("click",async()=>{if(!$("#cj").value)$("#cj").value=cfgGet();try{await navigator.clipboard.writeText($("#cj").value);$("#cm").textContent="Disalin ke papan klip."}catch(e){$("#cj").select();$("#cm").textContent="Teks terpilih. Salin dengan Ctrl+C."}});
+$("#ci").addEventListener("click",()=>{try{const c=JSON.parse($("#cj").value);if(!c.S||!c.S.length)throw 0;n=Math.min(5,Math.max(2,c.S.length));if(TH[c.theme]){th=c.theme;$("#ar").style.background=`linear-gradient(${TH[th].bg[0]},${TH[th].bg[1]})`}
+ Object.assign(G,c.G||{});c.S.slice(0,5).forEach((s,i)=>Object.assign(S[i],s));ACT=[];GH=null;build();topSync();syncSl();restart();$("#cm").textContent="Konfigurasi dimuat."}catch(e){$("#cm").textContent="Format tidak valid. Pastikan isinya hasil Ekspor."}});
+applyTheme("laut");build();sync();restart();requestAnimationFrame(tick);
+</script>
+</body>
+</html>

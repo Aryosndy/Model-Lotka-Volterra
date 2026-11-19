@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #10291a;
+  --ink2: #2c4434;
+  --mist: #e7ebe8;
+  --paper: #f6f7f4;
+  --lime: #c6f35c;
+  --lime2: #a9dd3a;
+  --glass: rgba(244, 247, 243, 0.16);
+  --line: rgba(255, 255, 255, 0.28);
+  --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  background: var(--mist);
+  font-family: var(--sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mono {
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 11px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 9px;
+  background: var(--lime);
+  color: var(--ink);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lv-card {
+  background: #ffffff;
+  border: 1px solid #d5e0d7;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(16, 41, 26, 0.05);
+}
+
+.lv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #c5d3c8;
+  background: #ffffff;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.lv-btn:hover {
+  background: #eef4ef;
+  border-color: var(--ink);
+}
+
+.lv-btn-primary {
+  background: var(--ink);
+  color: var(--lime);
+  border-color: var(--ink);
+}
+
+.lv-btn-primary:hover {
+  background: #173a25;
+  color: #ffffff;
+}

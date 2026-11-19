@@ -1,0 +1,6 @@
+{
+  "name": "Mossline — Lotka-Volterra Ecosystem & Planet Intelligence Simulator",
+  "description": "Mossline Floating Moss Island Scroll Fly-In & Interactive Lotka-Volterra Predator-Prey Ecosystem Simulator based on peer-reviewed scientific journals by Aryo Sandy Prasetyo (230210240028).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
